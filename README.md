@@ -12,8 +12,6 @@ This repository houses hacking tools written in the following programming langua
 - C++
 - C#
 - Go
-- Groovy
-- Haskell
 - JavaScript
 - Julia
 - Lua
