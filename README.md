@@ -6,24 +6,18 @@ Welcome to the Hacking Tools repository, your one-stop destination for a diverse
 
 This repository houses hacking tools written in the following programming languages:
 
-- Assembly
 - [Bash](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_bash)
-- C
-- C++
-- C#
-- Go
-- JavaScript
-- Julia
-- Lua
-- PHP
-- Perl
-- Python
-- R
-- Ruby
-- Rust
-- Scala
-- Swift
-- TypeScript
+- [C](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_c)
+- [C++](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_c%2B%2B)
+- [Go](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_go)
+- [JavaScript](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_javascript)
+- [Lua](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_lua)
+- [PHP](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_php)
+- [Perl](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_perl)
+- [Python](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_python)
+- [Ruby](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_ruby)
+- [Rust](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_rust)
+- [TypeScript](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_typescript)
 
 Each tool is organized into corresponding language folders for easy navigation and access.
 
