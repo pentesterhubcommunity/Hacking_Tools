@@ -3,22 +3,6 @@
 # Prompt user for target URL
 read -p "Enter your target URL: " target_url
 
-# Run Gobuster to discover URLs
-echo "Running Gobuster on $target_url ..."
-gobuster dir -u "$target_url" -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -o gobuster_results.txt
-
-# Check if Gobuster ran successfully
-if [ $? -eq 0 ]; then
-    echo "Gobuster completed successfully."
-else
-    echo "Error: Gobuster failed to run."
-    exit 1
-fi
-
-# Extract URLs from Gobuster results
-echo "Extracting URLs..."
-urls=$(cat gobuster_results.txt | grep '^/' | awk '{print $2}')
-
 # Define additional test commands
 test_commands=(
     "curl -s -o /dev/null -w '%{http_code}' $target_url"
@@ -48,7 +32,6 @@ test_commands=(
     "whatweb $target_url" # Web scanner
     "dotdotpwn -m http -h $target_url" # Directory traversal scanner
     "sslscan --no-failed $target_url" # SSL/TLS security testing
-    "lynis audit system" # System auditing and security scanning
     "nmap -sV --script=banner $target_url" # Version detection
     "nmap --script=http-enum $target_url" # HTTP enum script
     "sqlmap -u $target_url --forms --batch --random-agent" # Automated SQL injection testing
@@ -62,15 +45,12 @@ test_commands=(
     # Add more test commands as needed
 )
 
-# Iterate through each URL and perform broken access control test
+# Perform tests
 echo "Performing broken access control test..."
-for url in $urls; do
-    echo "Testing URL: $url"
-    for command in "${test_commands[@]}"; do
-        echo "Command: $command"
-        eval "$command$url"
-        echo
-    done
+for command in "${test_commands[@]}"; do
+    echo "Command: $command"
+    eval "$command"
+    echo
 done
 
 echo "Broken access control test completed."
