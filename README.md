@@ -10,6 +10,7 @@ This repository houses hacking tools written in the following programming langua
 - [C](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_c)
 - [C++](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_c%2B%2B)
 - [Go](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_go)
+- [Java](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_java)
 - [JavaScript](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_javascript)
 - [Lua](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_lua)
 - [PHP](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_php)
