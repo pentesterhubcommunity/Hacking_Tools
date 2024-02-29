@@ -2,181 +2,96 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Define ANSI color escape codes
-#define RESET   "\x1B[0m"
-#define RED     "\x1B[31m"
-#define GREEN   "\x1B[32m"
-
-// Function to simulate authentication
-int authenticate(char *username, char *password) {
-    // Simulate authentication process (replace with actual implementation)
-    printf("Authenticating with username: %s, password: %s\n", username, password);
-    if (strcmp(username, "admin") == 0 && strcmp(password, "password123") == 0) {
-        return 1; // Authentication successful
-    } else {
-        return 0; // Authentication failed
-    }
-}
-
-// Function to access restricted resource
-void access_resource(char *username, char *website) {
-    // Simulate accessing restricted resource (replace with actual implementation)
-    printf("User '%s' has " GREEN "accessed" RESET " the restricted resource on website: %s\n", username, website);
-}
-
-// Function to bypass CAPTCHA using a CAPTCHA solving service
-void bypass_captcha() {
-    printf("Bypassing CAPTCHA using a CAPTCHA solving service...\n");
-    // Implement CAPTCHA bypass logic using a service or API
-}
-
-// Function to bypass rate limiting using proxy rotation
-void bypass_rate_limiting() {
-    printf("Bypassing rate limiting using proxy rotation...\n");
-    // Implement rate limiting bypass logic using proxies
-}
-
-// Function to bypass IP blocking using a proxy service
-void bypass_ip_blocking() {
-    printf("Bypassing IP blocking using a proxy service...\n");
-    // Implement IP blocking bypass logic using proxy services or VPNs
-}
-
-// Function to bypass multi-factor authentication using phishing
-void bypass_mfa_phishing() {
-    printf("Bypassing multi-factor authentication using phishing...\n");
-    // Implement MFA bypass logic using phishing techniques
-}
-
-// Function to bypass web application firewall using SQL injection
-void bypass_waf_sql_injection() {
-    printf("Bypassing web application firewall using SQL injection...\n");
-    // Implement WAF bypass logic using SQL injection attacks
-}
-
-// Function to provide suggestions for vulnerability mitigation
-void provide_suggestions(int failure_reason) {
-    printf("\n" RED "Authentication failed. Suggestions for further investigation:\n" RESET);
-    switch (failure_reason) {
-        case 1:
-            printf("- Check if the username and password are correct.\n");
-            printf("- Verify that the authentication logic is implemented correctly.\n");
-            break;
-        case 2:
-            printf("- Investigate potential issues with the CAPTCHA solving service.\n");
-            break;
-        case 3:
-            printf("- Check if the rate limiting bypass logic is functioning properly.\n");
-            break;
-        case 4:
-            printf("- Verify the effectiveness of the IP blocking bypass mechanism.\n");
-            break;
-        case 5:
-            printf("- Investigate potential issues with the multi-factor authentication bypass.\n");
-            break;
-        case 6:
-            printf("- Examine the effectiveness of the web application firewall bypass using SQL injection.\n");
-            break;
-        default:
-            printf("- Further investigation is needed to determine the cause of the authentication failure.\n");
-            break;
-    }
+// Function to run a command
+void run_command(const char *command) {
+    printf("Command: %s\n", command);
+    system(command);
+    printf("\n");
 }
 
 int main() {
-    char password_file[100];
-    char username_file[100];
-    char website[100];
-    char username[50];
-    char password[50];
-    char usernames[1000][50];
-    char passwords[1000][50];
-    int matched_pairs[1000] = {0}; // Array to track matched pairs
+    // Prompt user for target URL
+    char target_url[1000];
+    printf("Enter your target URL: ");
+    fgets(target_url, sizeof(target_url), stdin);
+    target_url[strcspn(target_url, "\n")] = 0; // Remove newline character
 
-    // Prompt user for target website login page link, username list file, and password list file path
-    printf("Enter your target website login page link: ");
-    scanf("%s", website);
-    printf("Enter username list file path: ");
-    scanf("%s", username_file);
-    printf("Enter password list file path: ");
-    scanf("%s", password_file);
+    // Run Gobuster to discover URLs
+    char gobuster_command[2000];
+    sprintf(gobuster_command, "gobuster dir -u %s -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -o gobuster_results.txt", target_url);
+    printf("Running Gobuster on %s ...\n", target_url);
+    system(gobuster_command);
 
-    // Open the username list file (you can add error handling if needed)
-    FILE *user_file = fopen(username_file, "r");
-    if (user_file == NULL) {
-        printf("Error opening username list file.\n");
-        return 1;
+    // Check if Gobuster ran successfully
+    if (system("echo $?") == 0) {
+        printf("Gobuster completed successfully.\n");
+    } else {
+        printf("Error: Gobuster failed to run.\n");
+        exit(1);
     }
 
-    // Open the password list file (you can add error handling if needed)
-    FILE *pass_file = fopen(password_file, "r");
-    if (pass_file == NULL) {
-        printf("Error opening password list file.\n");
-        fclose(user_file);
-        return 1;
-    }
+    // Extract URLs from Gobuster results
+    printf("Extracting URLs...\n");
+    FILE *fp = fopen("gobuster_results.txt", "r");
+    char line[1000];
+    while (fgets(line, sizeof(line), fp)) {
+        if (line[0] == '/') {
+            char *url = strtok(line, " ");
+            printf("Testing URL: %s\n", url);
+            
+            // Define additional test commands
+            char *test_commands[] = {
+                "curl -s -o /dev/null -w '%%{http_code}' %s",
+                "curl -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X POST -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X PUT -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X DELETE -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X OPTIONS -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X TRACE -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X HEAD -s -o /dev/null -w '%%{http_code}' %s"
+                "curl -X CONNECT -s -o /dev/null -w '%%{http_code}' %s"
+                "wget -q --method=HEAD -O /dev/null %s"
+                "nc -z -v %s 80"
+                "sqlmap -u %s --batch --random-agent" // You might need to adjust this based on your SQLMap configuration
+                "nmap -p 1-65535 %s" // Full port scan
+                "nikto -h %s" // Web server scanner
+                "dirb %s" // Directory brute-forcing
+                "wpscan --url %s" // WordPress vulnerability scanner
+                "gobuster dns -d %s -w /usr/share/wordlists/dirbuster/dns-Jhaddix.txt" // DNS subdomain brute-forcing
+                "amass enum -d %s" // DNS enumeration
+                "wfuzz -c --hc 404 -w /usr/share/wordlists/wfuzz/general/common.txt %s/FUZZ" // Fuzzing for sensitive files/directories
+                "hydra -L /usr/share/wordlists/metasploit/http_default_userpass.txt -P /usr/share/wordlists/metasploit/http_default_pass.txt %s http-get /" // Brute force login
+                "git clone --recursive %s" // Attempt to clone the repository
+                "svn checkout %s" // Attempt to checkout the SVN repository
+                "testssl.sh %s" // SSL/TLS security testing
+                "nikto -host %s" // Web server scanner (Nikto)
+                "uniscan -u %s -qweds" // Web application vulnerability scanner
+                "whatweb %s" // Web scanner
+                "dotdotpwn -m http -h %s" // Directory traversal scanner
+                "sslscan --no-failed %s" // SSL/TLS security testing
+                "nmap -sV --script=banner %s" // Version detection
+                "nmap --script=http-enum %s" // HTTP enum script
+                "sqlmap -u %s --forms --batch --random-agent" // Automated SQL injection testing
+                "nikto -host %s -Tuning 10" // Enhanced Nikto testing
+                "dirsearch -u %s -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -e html,php,asp,aspx,jsp,do,action,xml" // Directory and file brute-forcing
+                "wafw00f %s" // Web Application Firewall detection
+                "nuclei -target %s -t /path/to/nuclei-templates" // Generic vulnerability scanner
+                "snmp-check %s" // SNMP enumeration and testing
+                "smtp-user-enum -M VRFY -U /usr/share/wordlists/metasploit/unix_users.txt -t %s" // SMTP user enumeration
+                "ike-scan %s" // IKE/IPsec VPN scanning
+                // Add more test commands as needed
+            };
 
-    // Read usernames into memory
-    int num_usernames = 0;
-    while (fgets(usernames[num_usernames], sizeof(username), user_file)) {
-        // Remove newline character
-        strtok(usernames[num_usernames], "\n");
-        num_usernames++;
-    }
-
-    // Read passwords into memory
-    int num_passwords = 0;
-    while (fgets(passwords[num_passwords], sizeof(password), pass_file)) {
-        // Remove newline character
-        strtok(passwords[num_passwords], "\n");
-        num_passwords++;
-    }
-
-    // Attempt to bypass protection systems
-    bypass_captcha();
-    bypass_rate_limiting();
-    bypass_ip_blocking();
-    bypass_mfa_phishing();
-    bypass_waf_sql_injection();
-
-    // Attempt authentication for each combination of username and password
-    int authentication_failed = 1;
-    for (int i = 0; i < num_usernames; i++) {
-        for (int j = 0; j < num_passwords; j++) {
-            if (authenticate(usernames[i], passwords[j])) {
-                printf(GREEN "Authentication successful for user '%s' with password: %s\n" RESET, usernames[i], passwords[j]);
-                // Access the resource
-                access_resource(usernames[i], website);
-                matched_pairs[i] = 1; // Mark the pair as matched
-                authentication_failed = 0;
-                break;
-            } else {
-                printf(RED "Authentication failed for user '%s' with password: %s\n" RESET, usernames[i], passwords[j]);
+            for (int i = 0; i < sizeof(test_commands) / sizeof(test_commands[0]); i++) {
+                char command[2000];
+                snprintf(command, sizeof(command), test_commands[i], target_url);
+                run_command(command);
             }
         }
-        if (!authentication_failed) {
-            break;
-        }
     }
+    fclose(fp);
 
-    // If authentication failed, provide suggestions for further investigation
-    if (authentication_failed) {
-        provide_suggestions(1); // Reason code 1 for general authentication failure
-    }
-
-    // Attempt to log in using matched pairs
-    printf("\nAttempting to log in using matched pairs:\n");
-    for (int i = 0; i < num_usernames; i++) {
-        if (matched_pairs[i]) {
-            printf("Attempting login for user '%s'\n", usernames[i]);
-            // You can add code here to attempt login using the matched username-password pair
-            // For simplicity, let's just print a message indicating the attempt
-        }
-    }
-
-    // Close the files
-    fclose(user_file);
-    fclose(pass_file);
+    printf("Broken access control test completed.\n");
 
     return 0;
 }
