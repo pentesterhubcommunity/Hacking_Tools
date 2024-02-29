@@ -42,7 +42,6 @@ int main() {
             // Define additional test commands
             char *test_commands[] = {
                 "curl -s -o /dev/null -w '%%{http_code}' %s",
-                "curl -s -o /dev/null -w '%%{http_code}' %s"
                 "curl -X POST -s -o /dev/null -w '%%{http_code}' %s"
                 "curl -X PUT -s -o /dev/null -w '%%{http_code}' %s"
                 "curl -X DELETE -s -o /dev/null -w '%%{http_code}' %s"
