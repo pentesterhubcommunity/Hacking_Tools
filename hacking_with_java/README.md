@@ -18,8 +18,14 @@ To run the tools provided in this repository, follow these general steps:
    ```
    javac ToolName.java
    ```
+   or
+   ```java
+   javac FileName.java && java FileName
+   ```
+   
+   
 
-4. **Run the Tool:**
+5. **Run the Tool:**
    ```
    java ToolName
    ```
