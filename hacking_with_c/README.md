@@ -33,13 +33,17 @@ To run the hacking tools included in this repository, follow these general steps
    ```
    gcc tool_name.c -o tool_name
    ```
+   or
+   ```c
+   gcc tool_name.c -o tool_name -lcurl
+   ```
 
-4. **Run the Tool**: Execute the compiled binary file to run the tool:
+5. **Run the Tool**: Execute the compiled binary file to run the tool:
    ```
    ./tool_name
    ```
 
-5. **Follow Tool Instructions**: Depending on the tool, you may need to provide additional parameters or follow specific instructions to use it effectively. Refer to the tool's documentation or source code for more information.
+6. **Follow Tool Instructions**: Depending on the tool, you may need to provide additional parameters or follow specific instructions to use it effectively. Refer to the tool's documentation or source code for more information.
 
 ## Contributing
 
