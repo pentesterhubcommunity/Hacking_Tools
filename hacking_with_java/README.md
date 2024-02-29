@@ -1,7 +1,3 @@
-**Repository: hackig_with_java**
-
----
-
 ### Overview:
 This repository contains a collection of hacking tools implemented in Java. These tools cover various aspects of cybersecurity and can be used for testing, analysis, and learning purposes.
 
