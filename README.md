@@ -7,7 +7,6 @@ Welcome to the Hacking Tools repository, your one-stop destination for a diverse
 This repository houses hacking tools written in the following programming languages:
 
 - [Bash](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_bash)
-- [C](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_c)
 - [C++](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_c%2B%2B)
 - [Go](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_go)
 - [Java](https://github.com/saidehossain/Hacking_Tools/tree/main/hacking_with_java)
