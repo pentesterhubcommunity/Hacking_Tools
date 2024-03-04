@@ -1,4 +1,4 @@
-# Hacking Tools Repository
+# Hacking Tools
 
 Welcome to the Hacking Tools repository, your one-stop destination for a diverse collection of hacking tools written in various programming languages. Whether you're a cybersecurity professional, researcher, or enthusiast, this repository aims to provide you with a comprehensive toolkit for various purposes.
 
