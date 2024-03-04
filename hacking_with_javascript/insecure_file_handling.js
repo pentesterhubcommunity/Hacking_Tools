@@ -1,5 +1,4 @@
 const axios = require('axios');
-const readline = require('readline');
 
 // Commonly used payloads for testing insecure file handling vulnerability
 const payloads = [
@@ -48,35 +47,32 @@ const payloads = [
 // Function to test for insecure file handling vulnerability
 async function testInsecureFileHandling(url) {
     try {
-        const responses = await Promise.all(payloads.map(payload => axios.get(url + payload)));
-
-        // Analyze responses to detect potential vulnerabilities
-        responses.forEach((response, index) => {
-            const payload = payloads[index];
-            const vulnerable = response.data.includes("insecure_file");
-            console.log(`Payload: ${payload}, Result: ${vulnerable ? '\x1b[31mVulnerable' : '\x1b[32mNot Vulnerable'}`);
-            if (vulnerable) {
-                console.log('\x1b[0m', "Exploiting the vulnerability: Attacker can manipulate file paths to access sensitive files.");
+        // Iterate through each payload and send a request
+        for (const payload of payloads) {
+            try {
+                const response = await axios.get(url + payload);
+                const vulnerable = response.data.includes("insecure_file");
+                console.log(`Payload: ${payload}, Result: ${vulnerable ? '\x1b[31mVulnerable' : '\x1b[32mNot Vulnerable'}`);
+                if (vulnerable) {
+                    console.log('\x1b[0m', "Exploiting the vulnerability: Attacker can manipulate file paths to access sensitive files.");
+                }
+            } catch (error) {
+                console.log(`Payload: ${payload}, Result: \x1b[31mError occurred (${error.response.status}): ${error.response.statusText}`);
             }
-        });
+        }
     } catch (error) {
         console.error("Error occurred:", error.message);
     }
 }
 
-// Function to prompt user for target website URL
-function promptUser() {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    rl.question('Enter your target website url: ', (url) => {
-        // Test for insecure file handling vulnerability
-        testInsecureFileHandling(url);
-        rl.close();
-    });
-}
-
 // Prompt user for target website URL
-promptUser();
+const rl = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.question('Enter your target website url: ', (url) => {
+    // Test for insecure file handling vulnerability
+    testInsecureFileHandling(url);
+    rl.close();
+});
