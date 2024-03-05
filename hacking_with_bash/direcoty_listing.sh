@@ -41,7 +41,8 @@ timeout=10
 vulnerability_found=false
 for dir in "${directories[@]}"; do
     for ua in "${user_agents[@]}"; do
-        response=$(curl -s -o /dev/null -w "%{http_code}" --max-time $timeout -A "$ua" "${target_url}/${dir}/")
+        print_color 94 "Checking ${target_url}/${dir}/ with User-Agent: $ua"
+        response=$(curl -s -o /dev/null -w "%{http_code}" --max-time $timeout -A "$ua" -v "${target_url}/${dir}/" 2>&1)
         if [ "$response" == "200" ]; then
             print_color 92 "Directory listing vulnerability found on ${target_url}!"
             echo "Vulnerable directory: ${target_url}/${dir}/"
