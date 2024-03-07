@@ -1,100 +1,96 @@
 #!/bin/bash
-# This is a comment
 
-# Define color escape codes
+# Define colors for better visualization
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Function to perform Missing Security Headers detection
-detect_missing_security_headers() {
-    echo "Detecting Missing Security Headers..."
-    # Send a request and analyze the response headers
-    response=$(curl -s -i "$1")
-    response_code=$(echo "$response" | head -n 1 | awk '{print $2}')
-    response_headers=$(echo "$response" | sed '1,/\r\?$/d')
-    response_content=$(echo "$response" | sed -n '/^\r\?$/,$p' | tail -n +2)
+# Function to check if a header is present
+check_header() {
+    header="$1"
+    website="$2"
+    echo -e "${YELLOW}[+] Checking $header header...${NC}"
+    response=$(curl -s -I "$website" | grep -i "$header")
+    if [ -z "$response" ]; then
+        echo -e "${RED}[!] $header header is missing!${NC}"
+    else
+        echo -e "${GREEN}[✓] $header header is present.${NC}"
+    fi
+}
 
-    # Check for missing security headers
-    missing_headers=""
-    if ! grep -q 'Content-Security-Policy' <<< "$response_headers"; then
-        missing_headers+="Content-Security-Policy "
-        echo -e "${RED}Missing Content-Security-Policy header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Inject the payload <script>alert('XSS')</script> into input fields or parameters that reflect user-controlled data and observe if the XSS payload gets executed."
-        echo
-    fi
-    if ! grep -q 'X-Content-Type-Options' <<< "$response_headers"; then
-        missing_headers+="X-Content-Type-Options "
-        echo -e "${RED}Missing X-Content-Type-Options header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Upload a file with the extension .html but with the content-type image/png. Access the uploaded file and check if the browser interprets it as HTML and executes any scripts within the file."
-        echo
-    fi
-    if ! grep -q 'X-Frame-Options' <<< "$response_headers"; then
-        missing_headers+="X-Frame-Options "
-        echo -e "${RED}Missing X-Frame-Options header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Create an attacker-controlled HTML page (attacker.html) containing an iframe. Set the src attribute of the iframe to the target website's URL. Open attacker.html in a browser and observe if the target website is embedded within the iframe without any restrictions."
-        echo
-    fi
-    if ! grep -q 'X-XSS-Protection' <<< "$response_headers"; then
-        missing_headers+="X-XSS-Protection "
-        echo -e "${RED}Missing X-XSS-Protection header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Inject XSS payloads into input fields or parameters similar to testing for CSP vulnerabilities. For example, inject the payload <script>alert('XSS')</script> into input fields and observe if the XSS payload gets executed."
-        echo
-    fi
-    if ! grep -q 'Strict-Transport-Security' <<< "$response_headers"; then
-        missing_headers+="Strict-Transport-Security "
-        echo -e "${RED}Missing Strict-Transport-Security header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Ensure the website is accessed over HTTPS. If not, try accessing the website over HTTP and observe if it redirects to HTTPS."
-        echo
-    fi
-    if ! grep -q 'X-Content-Security-Policy' <<< "$response_headers"; then
-        missing_headers+="X-Content-Security-Policy "
-        echo -e "${RED}Missing X-Content-Security-Policy header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Similar to testing for Content-Security-Policy (CSP), inject XSS payloads and observe if they get executed."
-        echo
-    fi
-    if ! grep -q 'Referrer-Policy' <<< "$response_headers"; then
-        missing_headers+="Referrer-Policy "
-        echo -e "${RED}Missing Referrer-Policy header.${NC}"
-        echo -e "${YELLOW}URL:${NC} $1"
-        echo -e "${YELLOW}How to Test:${NC} Navigate from one page to another within the website and observe if the referrer header is sent. If sent, check if it contains sensitive information."
-        echo
+# Function to exploit identified vulnerabilities
+exploit_vulnerabilities() {
+    website="$1"
+    echo -e "${YELLOW}[+] Attempting to exploit identified vulnerabilities...${NC}"
+    
+    # Exploit techniques
+    # Technique 1: Clickjacking via X-Frame-Options
+    response=$(curl -s -I "$website" | grep -i "X-Frame-Options: SAMEORIGIN")
+    if [ -z "$response" ]; then
+        echo -e "${GREEN}[✓] X-Frame-Options is not set to SAMEORIGIN, potential clickjacking vulnerability.${NC}"
+        echo -e "${YELLOW}[!] To test this vulnerability, try embedding the target website in an iframe:${NC}"
+        echo -e "${YELLOW}    <iframe src='$website' width='800' height='600'></iframe>${NC}"
     fi
     
-    if [ -z "$missing_headers" ]; then
-        echo -e "${GREEN}No missing security headers detected.${NC}"
+    # Technique 2: XSS via X-XSS-Protection
+    response=$(curl -s -I "$website" | grep -i "X-XSS-Protection: 0")
+    if [ -z "$response" ]; then
+        echo -e "${GREEN}[✓] X-XSS-Protection header is not set to 0, potential XSS vulnerability.${NC}"
+        echo -e "${YELLOW}[!] To test this vulnerability, try injecting a XSS payload in input fields:${NC}"
+        echo -e "${YELLOW}    <script>alert('XSS');</script>${NC}"
     fi
-
-    # Analyze response content
-    echo -e "${YELLOW}Response Code:${NC} $response_code"
-    echo -e "${YELLOW}Response Content:${NC}"
-    echo "$response_content"
+    
+    # Technique 3: MIME-sniffing via X-Content-Type-Options
+    response=$(curl -s -I "$website" | grep -i "X-Content-Type-Options: nosniff")
+    if [ -z "$response" ]; then
+        echo -e "${GREEN}[✓] X-Content-Type-Options is not set to nosniff, potential MIME-sniffing vulnerability.${NC}"
+        echo -e "${YELLOW}[!] To test this vulnerability, try uploading a file with incorrect MIME type:${NC}"
+        echo -e "${YELLOW}    Upload a file with .txt extension containing HTML/JavaScript content.${NC}"
+    fi
+    
+    # Technique 4: CSP Bypass via Content-Security-Policy
+    response=$(curl -s -I "$website" | grep -i "Content-Security-Policy:.*unsafe-inline")
+    if [ -z "$response" ]; then
+        echo -e "${GREEN}[✓] Content-Security-Policy does not restrict 'unsafe-inline', potential CSP bypass vulnerability.${NC}"
+        echo -e "${YELLOW}[!] To test this vulnerability, try injecting inline JavaScript in the website:${NC}"
+        echo -e "${YELLOW}    <script>alert('CSP Bypass');</script>${NC}"
+    fi
+    
+    # Technique 5: HTTP Public Key Pinning (HPKP) bypass
+    response=$(curl -s -I "$website" | grep -i "Public-Key-Pins")
+    if [ -z "$response" ]; then
+        echo -e "${GREEN}[✓] Public-Key-Pins header is missing, potential HPKP bypass vulnerability.${NC}"
+        echo -e "${YELLOW}[!] To test this vulnerability, try accessing the website using a different domain with a forged certificate:${NC}"
+        echo -e "${YELLOW}    Example: curl -H 'Host: forgeddomain.com' $website${NC}"
+    fi
+    
+    # Add more exploit techniques as needed
+    
+    echo -e "${GREEN}[✓] Exploitation attempt complete.${NC}"
 }
 
 # Main function
 main() {
-    echo -e "${GREEN}Missing Security Headers Detection Tool${NC}"
-    echo "---------------------------------------"
+    echo -e "${YELLOW}[+] Welcome to HTTP Security Headers Misconfiguration Vulnerability Tester${NC}"
+    read -p "Enter your target website URL: " website
+    echo -e "${YELLOW}[+] Testing security headers for $website${NC}"
+    
+    # Check for security headers
+    check_header "Strict-Transport-Security" "$website"
+    check_header "X-Frame-Options" "$website"
+    check_header "X-XSS-Protection" "$website"
+    check_header "X-Content-Type-Options" "$website"
+    check_header "Content-Security-Policy" "$website"
+    check_header "Referrer-Policy" "$website"
+    check_header "Feature-Policy" "$website"
+    check_header "Expect-CT" "$website"
+    check_header "X-Permitted-Cross-Domain-Policies" "$website"
+    check_header "Public-Key-Pins" "$website"
 
-    # Prompt the user to enter the target website link
-    read -p "Enter your target website link: " target_url
-
-    # Validate input
-    if [ -z "$target_url" ]; then
-        echo -e "${RED}URL cannot be empty.${NC}"
-        exit 1
-    fi
-
-    # Perform Missing Security Headers detection
-    detect_missing_security_headers "$target_url"
+    # Attempt to exploit identified vulnerabilities
+    exploit_vulnerabilities "$website"
 }
 
-# Call main function
+# Run the main function
 main
