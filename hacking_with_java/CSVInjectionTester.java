@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-public class HttpSecurityHeaderTester {
+public class CSVInjectionTester {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
