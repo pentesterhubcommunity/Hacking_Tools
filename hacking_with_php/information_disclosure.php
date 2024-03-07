@@ -41,6 +41,40 @@ function checkInfoDisclosure($url) {
         echo "\033[0;32m[+] Information Disclosure vulnerability found!\n";
         echo "\033[0;33m[*] Content:\n";
         echo $response['content'];
+    } elseif ($status_code == 403) {
+        echo "\033[0;33m[+] Detected protection system (403 Forbidden)\n";
+        echo "\033[0;36m[*] Attempting to bypass protection...\n";
+        
+        // Bypass techniques
+        $bypassed = false;
+        
+        // Technique 1: User-Agent Spoofing
+        $headers = array('User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36');
+        $response = fetchURL($url, $headers);
+        if ($response['http_code'] == 200) {
+            echo "\033[0;32m[*] Bypass successful using User-Agent spoofing\n";
+            echo "\033[0;33m[*] Content:\n";
+            echo $response['content'];
+            $bypassed = true;
+        }
+        
+        // Technique 2: Adding Referer Header
+        if (!$bypassed) {
+            $headers = array('Referer: https://www.google.com/');
+            $response = fetchURL($url, $headers);
+            if ($response['http_code'] == 200) {
+                echo "\033[0;32m[*] Bypass successful using Referer header\n";
+                echo "\033[0;33m[*] Content:\n";
+                echo $response['content'];
+                $bypassed = true;
+            }
+        }
+        
+        // Add more bypass techniques here
+        
+        if (!$bypassed) {
+            echo "\033[0;31m[-] Bypass attempt unsuccessful\n";
+        }
     } elseif ($status_code == 404) {
         echo "\033[0;31m[-] The specified URL does not exist (HTTP code $status_code)\n";
     } elseif ($status_code >= 400 && $status_code < 500) {
@@ -51,6 +85,7 @@ function checkInfoDisclosure($url) {
         echo "\033[0;31m[-] Unable to retrieve content (HTTP code $status_code)\n";
     }
 }
+
 
 // Main program
 echo "\033[1;36mEnter your target website URL: ";
