@@ -31,7 +31,7 @@ sub test_lfi {
         my @links = $tree->look_down('_tag', 'a');
         foreach my $link (@links) {
             my $href = $link->attr('href');
-            if ($href =~ /(?:\?|&)file=([^&]+)/) {
+            if ($href && $href =~ /(?:\?|&)file=([^&]+)/) {
                 my $file_param = $1;
                 print color('red');
                 print "The target website may be vulnerable to LFI!\n";
@@ -45,7 +45,7 @@ sub test_lfi {
         # Check for potential directory traversal vulnerability in script URLs
         foreach my $link (@links) {
             my $href = $link->attr('href');
-            if ($href =~ /\.\.\//) {
+            if ($href && $href =~ /\.\.\//) {
                 print color('yellow');
                 print "The target website may be vulnerable to directory traversal!\n";
                 print "Check if the script URLs allow directory traversal.\n";
