@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML5 Cross-Origin Messaging Tester</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+  #output {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  .success {
+    color: green;
+  }
+  .error {
+    color: red;
+  }
+</style>
+</head>
+<body>
+<div id="output"></div>
+<script>
+  // Function to test for HTML5 Cross-Origin Messaging vulnerability
+  function testCrossOriginMessaging(targetURL) {
+    return new Promise((resolve, reject) => {
+      try {
+        var iframe = document.createElement('iframe');
+        iframe.src = targetURL;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        
+        window.addEventListener('message', function(event) {
+          // Check if the event origin matches the target URL
+          if (event.origin === targetURL) {
+            resolve(true);
+          }
+        });
+        
+        setTimeout(() => {
+          resolve(false);
+        }, 5000); // Set a timeout to stop waiting for messages after 5 seconds
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  
+  // Prompt user for target website URL
+  var targetURL = prompt('Enter your target website URL:');
+
+  // Validate the URL format
+  var urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+  if (!urlPattern.test(targetURL)) {
+    document.getElementById('output').innerHTML = '<p class="error">Invalid URL format. Please enter a valid URL.</p>';
+  } else {
+    // Test for Cross-Origin Messaging vulnerability
+    document.getElementById('output').innerHTML = '<p>Testing for HTML5 Cross-Origin Messaging vulnerability on ' + targetURL + '...</p>';
+    testCrossOriginMessaging(targetURL)
+      .then((vulnerable) => {
+        if (vulnerable) {
+          document.getElementById('output').innerHTML += '<p class="success">Target website is vulnerable to HTML5 Cross-Origin Messaging!</p>';
+        } else {
+          document.getElementById('output').innerHTML += '<p class="error">Target website is not vulnerable to HTML5 Cross-Origin Messaging.</p>';
+        }
+      })
+      .catch((error) => {
+        document.getElementById('output').innerHTML += '<p class="error">Error: ' + error.message + '</p>';
+      });
+  }
+</script>
+</body>
+</html>
